@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Platform dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f8fc;--card:#fff;--text:#1b2233;--muted:#586175;--line:#e4e8f0;--soft:#eef1f7;--field:#fff;--primary:#4f7cf3;--green:#10a37f;--err:#c93434;--errbg:#fdecec;--shadow:0 4px 18px rgba(30,40,70,.07);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0e1219;--card:#171c26;--text:#eef1f7;--muted:#9aa4b6;--line:#272e3c;--soft:#222938;--field:#111620;--green:#2fd1a0;--err:#ff8a8a;--errbg:#3a1d1f;--shadow:0 4px 18px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0e1219;--card:#171c26;--text:#eef1f7;--muted:#9aa4b6;--line:#272e3c;--soft:#222938;--field:#111620;--green:#2fd1a0;--err:#ff8a8a;--errbg:#3a1d1f;--shadow:0 4px 18px rgba(0,0,0,.35)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+body.dash::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--card);z-index:30}
+[hidden]{display:none!important}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* auth */
+.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.panel{width:100%;max-width:420px;background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:30px 24px}
+.mark{width:52px;height:52px;border-radius:16px;background:rgba(79,124,243,.14);color:var(--primary);display:grid;place-items:center;margin-bottom:18px}
+.mark .i{width:26px;height:26px}
+h1{font-size:24px;font-weight:800;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14.5px;margin:0 0 22px;line-height:1.5}
+label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+input{width:100%;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--field);color:var(--text);font:inherit;font-size:15px;padding:0 14px}
+input:focus{outline:2px solid var(--primary);outline-offset:0;border-color:var(--primary)}
+.btn{width:100%;height:50px;border-radius:12px;background:var(--primary);color:#fff;font-weight:700;font-size:15.5px;margin-top:22px}
+.btn:hover{filter:brightness(1.07)}
+.err{display:none;background:var(--errbg);color:var(--err);font-size:13.5px;font-weight:500;padding:10px 12px;border-radius:10px;margin-top:14px}
+.err.on{display:block}
+.swap{text-align:center;font-size:14px;color:var(--muted);margin:20px 0 0}
+.swap button{background:none;color:var(--primary);font-weight:700;padding:0}
+.cap{display:flex;gap:10px;align-items:center}
+.cap canvas{width:160px;height:48px;border-radius:12px;border:1px solid var(--line);flex:none}
+.cap .re{width:44px;height:44px;border-radius:12px;background:var(--soft);display:grid;place-items:center;flex:none;color:var(--muted)}
+.hint{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+
+/* dashboard */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--card);display:flex;align-items:center;gap:10px;padding:12px 16px;box-shadow:0 1px 10px rgba(30,40,70,.08)}
+.top h2{font-size:16px;font-weight:700;line-height:1.2;margin:0 auto 0 4px;min-width:0}
+.sq{width:42px;height:42px;border-radius:12px;background:var(--soft);display:grid;place-items:center;color:var(--muted)}
+.sq .i{width:20px;height:20px}
+.sq.menu{color:var(--text)}
+.sq.menu .i{width:24px;height:24px}
+.avatar{width:40px;height:40px;border-radius:50%;background:#e6b422;color:#fff;font-weight:700;font-size:17px;display:grid;place-items:center}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:20px 18px 18px;min-width:0}
+.tile{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;margin-bottom:18px}
+.tile .i{width:23px;height:23px}
+.t-blue{background:rgba(59,130,246,.13);color:#3b82f6}
+.t-green{background:rgba(16,185,129,.13);color:#10b981}
+.t-amber{background:rgba(245,158,11,.14);color:#f59e0b}
+.t-purple{background:rgba(139,92,246,.14);color:#8b5cf6}
+.t-red{background:rgba(239,68,68,.13);color:#ef4444}
+.val{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.lbl{font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:8px;line-height:1.4}
+.note{display:flex;align-items:center;gap:6px;color:var(--green);font-size:12.5px;font-weight:600;margin-top:10px}
+.note .i{width:15px;height:15px}
+@media (min-width:760px){.grid{grid-template-columns:repeat(3,1fr);gap:18px}.wrap{padding:24px}.val{font-size:32px}}
+
+/* drawer */
+.shade{position:fixed;inset:0;background:rgba(10,14,24,.5);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:280px;max-width:84vw;background:var(--card);z-index:50;transform:translateX(-100%);transition:transform .22s;padding:calc(24px + env(safe-area-inset-top,0px)) 18px 24px;display:flex;flex-direction:column}
+body.open .shade{opacity:1;pointer-events:auto}
+body.open .drawer{transform:none}
+.who{display:flex;gap:12px;align-items:center;padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.who b{display:block;font-size:15px}
+.who span{font-size:13px;color:var(--muted);word-break:break-all}
+.nav{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border-radius:12px;font-weight:600;font-size:15px;background:none;text-align:left}
+.nav.on{background:rgba(79,124,243,.13);color:var(--primary)}
+.nav.out{margin-top:auto;color:var(--err)}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:#1b2233;color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.wrap.narrow{max-width:620px}
+.panel2{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:22px 20px}
+.panel2+.panel2{margin-top:14px}
+.panel2 h3{font-size:18px;font-weight:800;margin:0 0 6px;letter-spacing:-.01em}
+.panel2 p{color:var(--muted);font-size:14.5px;line-height:1.55;margin:0}
+.panel2 .empty{margin-top:12px}
+.btn.link{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+.opt{background:var(--field);border:2px solid var(--line);border-radius:16px;padding:16px 14px;text-align:left;display:flex;flex-direction:column;gap:12px;font-weight:700;font-size:15px}
+.opt:hover{border-color:var(--primary)}
+.opt.on{border-color:var(--primary);background:rgba(79,124,243,.09)}
+.opt .tile{margin:0;width:42px;height:42px;font-weight:800;font-size:16px}
+#wd-list{margin-top:8px}
+.req{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.req b{display:block;font-size:15px}
+.req span{display:block;font-size:13px;color:var(--muted);margin-top:2px;word-break:break-all}
+.req .amt{text-align:right;font-weight:800;font-size:16px;flex:none}
+.req .amt em{display:inline-block;font-style:normal;font-size:12px;font-weight:600;color:#d98a0b;background:rgba(245,158,11,.15);border-radius:999px;padding:3px 9px;margin-top:6px}
+.wrap.adm{max-width:860px}
+#dep-list,#adm-users,#adm-dep,#adm-wd,#adm-inv{margin-top:8px}
+.err.ok{background:rgba(16,163,127,.13);color:var(--green)}
+.req .amt em.approved{color:var(--green);background:rgba(16,185,129,.14)}
+.req .amt em.rejected{color:var(--err);background:var(--errbg)}
+.adm .req{flex-direction:column}
+.act{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.act input{width:110px;height:38px;font-size:14px;padding:0 10px}
+.act button{height:38px;padding:0 12px;border-radius:10px;background:var(--soft);font-weight:600;font-size:13px}
+.act button.ok{background:rgba(16,185,129,.16);color:var(--green)}
+.act button.no{background:var(--errbg);color:var(--err)}
+@media (min-width:700px){.adm .req{flex-direction:row;align-items:center}.act{justify-content:flex-end}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+<symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></symbol>
+<symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+<symbol id="i-in" viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
+<symbol id="i-out" viewBox="0 0 24 24"><path d="M12 15V3m0 0L8 7m4-4 4 4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+<symbol id="i-dn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M12 7v9m0 0-3.5-3.5M12 16l3.5-3.5" stroke="#fff"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M12 17V8m0 0-3.5 3.5M12 8l3.5 3.5" stroke="#fff"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><path d="M3 12A9 9 0 0 1 18.5 5.8L21 8"/><path d="M21 3v5h-5"/></symbol>
+<symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 22h18M6 18v-7M10 18v-7M14 18v-7M18 18v-7M12 2l8 5H4z"/></symbol>
+<symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></symbol>
+</svg>
+
+<!-- LOG IN -->
+<main class="auth" id="v-login" hidden>
+  <section class="panel">
+    <div class="mark"><svg class="i"><use href="#i-trend"/></svg></div>
+    <h1>Log in</h1>
+    <p class="sub">Enter your email and password to open your dashboard.</p>
+    <form id="f-login" novalidate>
+      <label for="l-email">Email</label>
+      <input id="l-email" type="email" autocomplete="username" placeholder="you@example.com" required>
+      <label for="l-pass">Password</label>
+      <input id="l-pass" type="password" autocomplete="current-password" placeholder="Your password" required>
+      <div class="err" id="l-err" role="alert"></div>
+      <button class="btn" type="submit">Log in</button>
+    </form>
+    <p class="swap">Don’t have an account? <button type="button" data-go="signup">Sign up</button></p>
+  </section>
+</main>
+
+<!-- SIGN UP -->
+<main class="auth" id="v-signup" hidden>
+  <section class="panel">
+    <div class="mark"><svg class="i"><use href="#i-users"/></svg></div>
+    <h1>Create your account</h1>
+    <p class="sub">Fill in your details and solve the captcha to sign up.</p>
+    <form id="f-signup" novalidate>
+      <label for="s-name">Full name</label>
+      <input id="s-name" type="text" autocomplete="name" placeholder="Juan Dela Cruz" required>
+      <label for="s-email">Email</label>
+      <input id="s-email" type="email" autocomplete="email" placeholder="you@example.com" required>
+      <label for="s-phone">Phone number</label>
+      <input id="s-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+63 912 345 6789" required>
+      <label for="s-pass">Password</label>
+      <input id="s-pass" type="password" autocomplete="new-password" placeholder="At least 6 characters" required>
+      <label for="cap">Captcha</label>
+      <div class="cap">
+        <canvas id="cv" width="160" height="48" aria-label="Captcha code"></canvas>
+        <button type="button" class="re" id="re" aria-label="Get a new captcha"><svg class="i"><use href="#i-refresh"/></svg></button>
+      </div>
+      <input id="cap" type="text" autocomplete="off" autocapitalize="characters" placeholder="Type the characters above" style="margin-top:10px" required>
+      <p class="hint">Not case sensitive.</p>
+      <div class="err" id="s-err" role="alert"></div>
+      <button class="btn" type="submit">Sign up</button>
+    </form>
+    <p class="swap">Already have an account? <button type="button" data-go="login">Log in</button></p>
+  </section>
+</main>
+
+<!-- DASHBOARD -->
+<div id="v-dash" hidden>
+  <header class="top">
+    <button class="sq menu" id="burger" aria-label="Open menu"><svg class="i"><use href="#i-menu"/></svg></button>
+    <h2 id="title">Platform dashboard</h2>
+    <button class="sq" data-page="dep" aria-label="Deposit requests"><svg class="i"><use href="#i-dn"/></svg></button>
+    <button class="sq" data-page="wd" aria-label="Withdrawal requests"><svg class="i"><use href="#i-up"/></svg></button>
+    <button class="avatar" id="av" aria-label="Open account menu">A</button>
+  </header>
+  <div class="wrap" id="p-dash">
+    <div class="grid">
+      <div class="card"><div class="tile t-blue"><svg class="i"><use href="#i-users"/></svg></div><div class="val" id="s-users">0</div><div class="lbl">Total users</div><div class="note"><svg class="i"><use href="#i-trend"/></svg><span id="s-ua">0</span> Active</div></div>
+      <div class="card"><div class="tile t-green"><svg class="i"><use href="#i-trend"/></svg></div><div class="val" id="s-inv">0</div><div class="lbl">Investments</div><div class="note"><svg class="i"><use href="#i-check"/></svg><span id="s-ia">0</span> Active</div></div>
+      <div class="card"><div class="tile t-amber"><svg class="i"><use href="#i-wallet"/></svg></div><div class="val" id="s-bal">₱0</div><div class="lbl">Total balance</div><div class="note"><svg class="i"><use href="#i-shield"/></svg>System Balance</div></div>
+      <div class="card"><div class="tile t-purple"><svg class="i"><use href="#i-in"/></svg></div><div class="val" id="s-dep">₱0</div><div class="lbl">Pending deposits</div><div class="note"><svg class="i"><use href="#i-clock"/></svg><span id="s-dc">0</span> awaiting approval</div></div>
+      <div class="card"><div class="tile t-red"><svg class="i"><use href="#i-out"/></svg></div><div class="val" id="s-wd">₱0</div><div class="lbl">Pending withdrawals</div><div class="note"><svg class="i"><use href="#i-clock"/></svg><span id="s-wc">0</span> awaiting approval</div></div>
+    </div>
+  </div>
+  <div class="wrap narrow" id="p-dep" hidden>
+    <section class="panel2">
+      <div class="tile t-purple"><svg class="i"><use href="#i-in"/></svg></div>
+      <h3>Need to make a deposit?</h3>
+      <p>Tap the button below and you’ll be routed to someone who can assist you with your deposit.</p>
+      <a class="btn link" href="https://t.me/+obXtHFhl1_syZGM1" target="_blank" rel="noopener noreferrer">Contact a deposit assistant</a>
+    </section>
+    <section class="panel2"><h3>Your deposits</h3><div id="dep-list"></div></section>
+  </div>
+  <div class="wrap narrow" id="p-wd" hidden>
+    <section class="panel2">
+      <h3>Choose a withdrawal method</h3>
+      <p>Select where you want to receive your money. Available balance: <b id="my-bal">₱0</b></p>
+      <div class="opts" id="wd-opts">
+        <button type="button" class="opt" data-m="GCash"><span class="tile t-blue">G</span>GCash</button>
+        <button type="button" class="opt" data-m="Maya"><span class="tile t-green">M</span>Maya</button>
+        <button type="button" class="opt" data-m="Maribank"><span class="tile t-amber">MB</span>Maribank</button>
+        <button type="button" class="opt" data-m="Other banks"><span class="tile t-purple"><svg class="i"><use href="#i-bank"/></svg></span>Other banks</button>
+      </div>
+      <form id="wd-form" hidden novalidate>
+        <h3 id="wd-title" style="margin-top:24px"></h3>
+        <label for="w-name">Account name</label>
+        <input id="w-name" type="text" autocomplete="off" placeholder="Name on the account">
+        <div id="w-bank-w" hidden><label for="w-bank">Bank name</label><input id="w-bank" type="text" autocomplete="off" placeholder="For example, BDO"></div>
+        <label id="w-acc-l" for="w-acc"></label>
+        <input id="w-acc" type="text" inputmode="numeric" autocomplete="off" placeholder="Numbers only">
+        <label for="w-amt">Amount (₱)</label>
+        <input id="w-amt" type="number" inputmode="decimal" min="1" step="any" placeholder="0.00">
+        <div class="err" id="wd-err" role="alert"></div>
+        <button class="btn" type="submit">Request withdrawal</button>
+      </form>
+    </section>
+    <section class="panel2">
+      <h3>Your requests</h3>
+      <div id="wd-list"></div>
+    </section>
+  </div>
+  <div class="wrap narrow adm" id="p-adm" hidden>
+    <section class="panel2"><h3>Users</h3><div id="adm-users"></div></section>
+    <section class="panel2"><h3>Pending deposits</h3><div id="adm-dep"></div></section>
+    <section class="panel2"><h3>Pending withdrawals</h3><div id="adm-wd"></div></section>
+    <section class="panel2"><h3>Active investments</h3><div id="adm-inv"></div></section>
+  </div>
+  <div class="shade" id="shade"></div>
+  <aside class="drawer" aria-label="Menu">
+    <div class="who"><div class="avatar" id="av2">A</div><div><b id="d-name"></b><span id="d-mail"></span></div></div>
+    <button class="nav on" data-page="dash"><svg class="i"><use href="#i-trend"/></svg>Platform dashboard</button>
+    <button class="nav" data-page="dep"><svg class="i"><use href="#i-in"/></svg>Deposit Requests</button>
+    <button class="nav" data-page="wd"><svg class="i"><use href="#i-out"/></svg>Withdrawal Requests</button>
+    <button class="nav adm-only" data-page="adm" hidden><svg class="i"><use href="#i-users"/></svg>Admin panel</button>
+    <button class="nav out" id="logout"><svg class="i"><use href="#i-logout"/></svg>Log out</button>
+  </aside>
+</div>
+<div id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script>
+if(!window.supabase){document.body.textContent='Could not load the app. Check your internet connection and refresh.';throw new Error('supabase missing')}
+const SB_URL='https://hbfogctqqgprjgliqvyz.supabase.co',SB_KEY='sb_publishable_rTX51OqO3gG21l4pZIimJw_QH4qtwtS';
+const sb=window.supabase.createClient(SB_URL,SB_KEY);
+const $=s=>document.querySelector(s);
+let me=null;
+const open=v=>document.body.classList.toggle('open',v);
+const money=n=>'₱'+Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2});
+const num=n=>Number(n||0).toLocaleString('en-US');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const date=d=>new Date(d).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
+const lines=a=>a.map(l=>'<span>'+esc(l)+'</span>').join('');
+function err(sel,msg,ok){const e=$(sel);e.textContent=msg;e.classList.toggle('ok',!!ok);e.classList.add('on')}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2400)}
+function show(v){
+  ['login','signup','dash'].forEach(n=>$('#v-'+n).hidden=n!==v);
+  document.body.classList.toggle('dash',v==='dash');open(false);
+  document.querySelectorAll('.err').forEach(e=>e.classList.remove('on'));
+  if(v==='signup')newCaptcha();
+  window.scrollTo(0,0);
+}
+
+/* captcha */
+let code='';
+function newCaptcha(){
+  const c=$('#cv'),x=c.getContext('2d'),A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  code='';x.fillStyle='#eef1f8';x.fillRect(0,0,c.width,c.height);
+  for(let i=0;i<7;i++){x.strokeStyle='hsl('+Math.floor(Math.random()*360)+',50%,62%)';x.lineWidth=1.5;x.beginPath();x.moveTo(Math.random()*c.width,Math.random()*c.height);x.lineTo(Math.random()*c.width,Math.random()*c.height);x.stroke()}
+  for(let i=0;i<5;i++){const ch=A[Math.floor(Math.random()*A.length)];code+=ch;x.save();x.translate(24+i*28,32);x.rotate((Math.random()-.5)*.6);x.font='700 28px Inter,Arial,sans-serif';x.textAlign='center';x.fillStyle='hsl('+Math.floor(Math.random()*360)+',55%,33%)';x.fillText(ch,0,0);x.restore()}
+  $('#cap').value='';
+}
+$('#re').onclick=newCaptcha;
+
+/* pages */
+const titles={dash:'Platform dashboard',dep:'Deposit Requests',wd:'Withdrawal Requests',adm:'Admin panel'};
+function page(p){
+  ['dash','dep','wd','adm'].forEach(n=>$('#p-'+n).hidden=n!==p);
+  document.querySelectorAll('.nav[data-page]').forEach(b=>b.classList.toggle('on',b.dataset.page===p));
+  $('#title').textContent=titles[p];open(false);window.scrollTo(0,0);
+  if(p==='dash')loadStats();
+  if(p==='dep')loadDeposits();
+  if(p==='wd')wdReset();
+  if(p==='adm')loadAdmin();
+}
+document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>page(b.dataset.page));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
+
+async function refreshMe(){
+  const {data}=await sb.from('profiles').select('*').eq('id',me.id).single();
+  if(data){me=data;$('#my-bal').textContent=money(me.balance)}
+}
+async function enter(user){
+  const {data}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  if(!data){await sb.auth.signOut();show('login');return err('#l-err','We couldn’t load your account. Try logging in again.')}
+  me=data;
+  const first=(me.full_name.trim()[0]||'A').toUpperCase();
+  $('#av').textContent=first;$('#av2').textContent=first;
+  $('#d-name').textContent=me.full_name;$('#d-mail').textContent=me.email;$('#my-bal').textContent=money(me.balance);
+  document.querySelectorAll('.adm-only').forEach(e=>e.hidden=!me.is_admin);
+  show('dash');page('dash');
+}
+
+/* log in, sign up, log out */
+$('#f-login').onsubmit=async e=>{
+  e.preventDefault();
+  const em=$('#l-email').value.trim().toLowerCase(),pw=$('#l-pass').value;
+  if(!em||!pw)return err('#l-err','Enter your email and password.');
+  const b=e.submitter;b.disabled=true;
+  const {data,error}=await sb.auth.signInWithPassword({email:em,password:pw});
+  b.disabled=false;
+  if(error)return err('#l-err',/confirm/i.test(error.message)?'Confirm your email first, then log in.':'Email or password is incorrect. Check them and try again.');
+  $('#f-login').reset();enter(data.user);
+};
+$('#f-signup').onsubmit=async e=>{
+  e.preventDefault();
+  const name=$('#s-name').value.trim(),em=$('#s-email').value.trim().toLowerCase(),phone=$('#s-phone').value.trim(),pw=$('#s-pass').value,cap=$('#cap').value.trim().toUpperCase();
+  const digits=phone.replace(/\D/g,'');
+  if(name.length<2)return err('#s-err','Enter your full name.');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return err('#s-err','Enter a valid email address.');
+  if(!/^\+?[\d\s-]+$/.test(phone)||digits.length<10||digits.length>13)return err('#s-err','Enter a valid phone number, for example +63 912 345 6789.');
+  if(pw.length<6)return err('#s-err','Use a password with at least 6 characters.');
+  if(cap!==code){newCaptcha();return err('#s-err','The captcha didn’t match. Try the new code.')}
+  const b=e.submitter;b.disabled=true;
+  const {data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{full_name:name,phone}}});
+  b.disabled=false;
+  if(error){newCaptcha();return err('#s-err',error.message)}
+  if(data.user&&data.user.identities&&!data.user.identities.length){newCaptcha();return err('#s-err','An account with this email already exists. Log in instead.')}
+  $('#f-signup').reset();
+  if(data.session)return enter(data.user);
+  show('login');err('#l-err','Account created. Check your email to confirm it, then log in.',true);
+};
+$('#logout').onclick=async()=>{await sb.auth.signOut();me=null;show('login')};
+$('#burger').onclick=()=>open(true);$('#av').onclick=()=>open(true);$('#shade').onclick=()=>open(false);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')open(false)});
+
+/* dashboard totals */
+async function loadStats(){
+  const {data}=await sb.rpc('get_stats');if(!data)return;
+  const set=(id,v)=>$('#'+id).textContent=v;
+  set('s-users',num(data.users));set('s-ua',num(data.active_users));
+  set('s-inv',num(data.investments));set('s-ia',num(data.active_investments));
+  set('s-bal',money(data.balance));
+  set('s-dep',money(data.dep_amount));set('s-dc',num(data.dep_count));
+  set('s-wd',money(data.wd_amount));set('s-wc',num(data.wd_count));
+}
+
+/* requests lists */
+const row=(t,l,amt,st)=>'<div class="req"><div><b>'+esc(t)+'</b>'+lines(l)+'</div><div class="amt"><div>'+money(amt)+'</div><em class="'+st+'">'+st[0].toUpperCase()+st.slice(1)+'</em></div></div>';
+async function loadDeposits(){
+  const {data}=await sb.from('deposits').select('*').eq('user_id',me.id).order('created_at',{ascending:false}).limit(20);
+  $('#dep-list').innerHTML=data&&data.length?data.map(r=>row('Deposit',[date(r.created_at)],r.amount,r.status)).join(''):'<p class="empty">No deposits yet.</p>';
+}
+async function renderReqs(){
+  const {data}=await sb.from('withdrawals').select('*').eq('user_id',me.id).order('created_at',{ascending:false}).limit(20);
+  $('#wd-list').innerHTML=data&&data.length?data.map(r=>row(r.method,[r.account_name,r.account_number,date(r.created_at)],r.amount,r.status)).join(''):'<p class="empty">No withdrawal requests yet. Choose a method above to make one.</p>';
+}
+
+/* withdrawals */
+const fieldLabel={'GCash':'GCash mobile number','Maya':'Maya mobile number','Maribank':'Maribank account number','Other banks':'Account number'};
+let method='';
+function wdReset(){
+  method='';$('#wd-form').reset();$('#wd-form').hidden=true;
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('on'));
+  renderReqs();refreshMe();
+}
+document.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+  method=o.dataset.m;
+  document.querySelectorAll('.opt').forEach(x=>x.classList.toggle('on',x===o));
+  $('#wd-title').textContent='Withdraw to '+method;
+  $('#w-acc-l').textContent=fieldLabel[method];
+  $('#w-bank-w').hidden=method!=='Other banks';
+  $('#wd-err').classList.remove('on');$('#wd-form').hidden=false;
+  $('#wd-form').scrollIntoView({behavior:'smooth',block:'nearest'});
+});
+$('#wd-form').onsubmit=async e=>{
+  e.preventDefault();
+  const name=$('#w-name').value.trim(),acc=$('#w-acc').value.trim(),bank=$('#w-bank').value.trim(),amt=parseFloat($('#w-amt').value);
+  if(name.length<2)return err('#wd-err','Enter the name on the account.');
+  if(method==='Other banks'&&bank.length<2)return err('#wd-err','Enter the bank name.');
+  if(acc.replace(/\D/g,'').length<7)return err('#wd-err','Enter a valid '+fieldLabel[method].toLowerCase()+'.');
+  if(!(amt>0))return err('#wd-err','Enter the amount you want to withdraw.');
+  const b=e.submitter;b.disabled=true;
+  const {error}=await sb.rpc('request_withdrawal',{p_method:method==='Other banks'?bank:method,p_name:name,p_number:acc,p_amount:amt});
+  b.disabled=false;
+  if(error)return err('#wd-err',error.message);
+  wdReset();toast('Withdrawal request sent');
+};
+
+/* admin panel */
+const arow=(t,l,amt,k,id,yes,no)=>'<div class="req"><div><b>'+esc(t)+'</b>'+lines(l)+'</div><div class="act"><div class="amt">'+money(amt)+'</div>'+(yes?'<button class="ok" data-'+k+'="'+id+'" data-s="approved">'+yes+'</button>':'')+'<button class="no" data-'+k+'="'+id+'" data-s="'+(no[1])+'">'+no[0]+'</button></div></div>';
+async function loadAdmin(){
+  const [u,d,w,i]=await Promise.all([
+    sb.from('profiles').select('*').order('created_at',{ascending:false}),
+    sb.from('deposits').select('*').eq('status','pending').order('created_at'),
+    sb.from('withdrawals').select('*').eq('status','pending').order('created_at'),
+    sb.from('investments').select('*').eq('status','active').order('created_at',{ascending:false})]);
+  const users=u.data||[],nm=Object.fromEntries(users.map(x=>[x.id,x.full_name||x.email]));
+  const empty=t=>'<p class="empty">'+t+'</p>';
+  $('#adm-users').innerHTML=users.length?users.map(x=>'<div class="req"><div><b>'+esc(x.full_name||'No name')+'</b>'+lines([x.email,x.phone,'Balance '+money(x.balance)])+'</div><div class="act" data-u="'+x.id+'"><input type="number" min="1" step="any" placeholder="Amount"><button data-a="add">Add funds</button><button data-a="sub">Deduct</button><button data-a="dep">Log deposit</button><button data-a="inv">Invest</button></div></div>').join(''):empty('No users yet.');
+  $('#adm-dep').innerHTML=(d.data||[]).length?d.data.map(r=>arow(nm[r.user_id]||'User',[date(r.created_at)],r.amount,'dep',r.id,'Approve',['Reject','rejected'])).join(''):empty('No pending deposits.');
+  $('#adm-wd').innerHTML=(w.data||[]).length?w.data.map(r=>arow(nm[r.user_id]||'User',[r.method,r.account_name,r.account_number,date(r.created_at)],r.amount,'wd',r.id,'Approve',['Reject','rejected'])).join(''):empty('No pending withdrawals.');
+  $('#adm-inv').innerHTML=(i.data||[]).length?i.data.map(r=>arow(nm[r.user_id]||'User',[date(r.created_at)],r.amount,'inv',r.id,'',['Close','closed'])).join(''):empty('No active investments.');
+}
+$('#p-adm').onclick=async e=>{
+  const b=e.target.closest('button');if(!b||!me||!me.is_admin)return;
+  const d=b.dataset;let r;
+  if(d.a){
+    const box=b.closest('.act'),amt=parseFloat(box.querySelector('input').value);
+    if(!(amt>0))return toast('Enter an amount first');
+    const p={p_user:box.dataset.u};
+    r=d.a==='add'?await sb.rpc('admin_adjust_balance',{...p,p_delta:amt}):
+      d.a==='sub'?await sb.rpc('admin_adjust_balance',{...p,p_delta:-amt}):
+      d.a==='dep'?await sb.rpc('admin_add_deposit',{...p,p_amount:amt}):
+                  await sb.rpc('admin_add_investment',{...p,p_amount:amt});
+  }else if(d.dep)r=await sb.rpc('admin_set_deposit',{p_id:+d.dep,p_status:d.s});
+  else if(d.wd)r=await sb.rpc('admin_set_withdrawal',{p_id:+d.wd,p_status:d.s});
+  else if(d.inv)r=await sb.rpc('admin_set_investment',{p_id:+d.inv,p_status:d.s});
+  else return;
+  if(r.error)return toast(r.error.message);
+  toast('Saved');loadAdmin();
+};
+
+/* start */
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  session?enter(session.user):show('login');
+})();
+</script>
+</body>
+</html>
